@@ -52,9 +52,7 @@ Follow these steps to set up your development environment:
 ## Usage
 
 To run the application, execute the `main.py` script from the command line:
-    ```bash
-    python main.py
-    ```
+    `python main.py`
 ## Contributing
 
 Thank you for your interest in contributing to our project. However, at this moment, we are not actively seeking for new contributors. Please check back in the future as this may change. We appreciate your understanding and support.
