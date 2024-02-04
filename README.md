@@ -1,4 +1,4 @@
-# Project Name
+# sAIght
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -36,4 +36,4 @@ Thank you for your interest in contributing to our project. However, at this mom
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE.md).
