@@ -45,9 +45,12 @@ Follow these steps to set up your development environment:
     source venv/bin/activate
     ```
 3. **Install the dependencies**
-    After activating the virtual environment, use pip to install the Ultralytics library.
+    After activating the virtual environment, use pip to install the Ultralytics and the Supervision libraries.
     ```bash    
     pip install ultralytics
+    ```
+    ```bash    
+    pip install supervision
     ```
 ## Usage
 
