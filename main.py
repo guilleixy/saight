@@ -14,12 +14,13 @@ def main():
     # we use a loop to iterate through each frame of the video 
     for result in model.track(source=0, show=False, stream=True):
         frame = result.orig_img
-        detections = sv.Detections.from_ultralytics(result)
+        detections = sv.Detections.from_yolov8(result)
+        if result.boxes.id is not None:
+            detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
         labels = [
             f"{tracker_id} {model.model.names[class_id]} {confidence:0.2f}"
-            for tracker_id, confidence, class_id in zip(
-                detections.tracker_id, detections.confidence, detections.class_id
-            )
+            for _, confidence, class_id, tracker_id
+            in detections
         ]
 
         frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
