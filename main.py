@@ -49,7 +49,7 @@ def main():
                         persistent_detections.append(detections_dict[class_id])
                 else:
                     detections_dict[class_id] = Detection(tracker_id, confidence, class_id, class_name)
-            # Increment last_seen for each persistent detection and remove it if it hasn't been seen for 100 frames
+            # Increment last_seen for each persistent detection and remove it if it hasn't been seen for 80 frames
             for class_id, detection in list(detections_dict.items()):  # Use list to avoid RuntimeError
                 if detection.persistent:
                     detection.last_seen += 1
