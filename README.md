@@ -52,6 +52,9 @@ Follow these steps to set up your development environment:
     ```bash    
     pip install supervision==0.3.0
     ```
+    ```bash
+    pip install pyttsx3
+    ```
 ## Usage
 
 To run the application, execute the `main.py` script from the command line:

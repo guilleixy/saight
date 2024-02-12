@@ -1,8 +1,20 @@
 import cv2
+import pyttsx3
 
 from ultralytics import YOLO
 import supervision as sv
 import numpy as np
+
+import threading
+import queue
+
+def speak(engine, queue):
+    while True:
+        text = queue.get()
+        if text is None:
+            break
+        engine.say(text)
+        engine.runAndWait()
 
 class Detection:
     def __init__(self, tracker_id, confidence, class_id, class_name):
@@ -28,6 +40,11 @@ def main():
     detections_dict = {}
     persistent_detections = []
 
+    engine = pyttsx3.init()
+    speech_queue = queue.Queue()
+    speech_thread = threading.Thread(target=speak, args=(engine, speech_queue))
+    speech_thread.start()
+
     # source = 0 for webcam, source = 1 for video input
     # we use a loop to iterate through each frame of the video 
     for result in model.track(source=1, show=False, stream=True):
@@ -47,6 +64,7 @@ def main():
                     if detections_dict[class_id].count > 5 and not detections_dict[class_id].persistent:
                         detections_dict[class_id].persistent = True
                         persistent_detections.append(detections_dict[class_id])
+                        speech_queue.put(f"{detections_dict[class_id].class_name} detected")
                 else:
                     detections_dict[class_id] = Detection(tracker_id, confidence, class_id, class_name)
             # Increment last_seen for each persistent detection and remove it if it hasn't been seen for 80 frames
@@ -72,6 +90,8 @@ def main():
 
         if (cv2.waitKey(30) == 27):
             break
-
+    speech_queue.put(None)
+    speech_thread.join()
+    
 if __name__ == "__main__":
     main() 
