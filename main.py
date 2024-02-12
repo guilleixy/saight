@@ -41,6 +41,9 @@ def main():
     persistent_detections = []
 
     engine = pyttsx3.init()
+    engine.setProperty('voice', 'en_US')
+    engine.setProperty("rate", 150)
+
     speech_queue = queue.Queue()
     speech_thread = threading.Thread(target=speak, args=(engine, speech_queue))
     speech_thread.start()
@@ -92,6 +95,6 @@ def main():
             break
     speech_queue.put(None)
     speech_thread.join()
-    
+
 if __name__ == "__main__":
     main() 
