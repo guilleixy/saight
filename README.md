@@ -55,6 +55,8 @@ Follow these steps to set up your development environment:
     ```bash
     pip install pyttsx3
     ```
+
+    *Para SpeechRecognition: pip install SpeechRecognition y pip install pyaudio
 ## Usage
 
 To run the application, execute the `main.py` script from the command line:
