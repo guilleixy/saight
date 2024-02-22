@@ -15,6 +15,9 @@ speech_queue = queue.Queue()
 # Crear un reconocedor de voz
 r = sr.Recognizer()
 
+# A list of words similar to saigth to activate the voice assistant
+saigth_words = ["saigth", "site", "sight", "cite"]
+
 def speak(engine, queue):
     while True:
         text = queue.get()
@@ -32,9 +35,14 @@ def listen():
             try:
                 # Usar el reconocedor de voz de Google
                 text = r.recognize_google(audio, language='es-ES')
-                if "hola" in text:
-                    speech_queue.put("Hola, ¿en qué puedo ayudarte?")
+
+                # Comandos de voz
+                if "GPT" in text:
+                    speech_queue.put("Esto lo respondería GPT")
+                if any(word in text for word in saigth_words):
+                    speech_queue.put("Esto lo respondería Saight")
                 print("Dijiste: {}".format(text))
+
             except sr.UnknownValueError:
                 print("Google Speech Recognition no pudo entender el audio")
             except sr.RequestError as e:
@@ -85,7 +93,10 @@ def main():
             # the number of objects does not matter.
             
             #filter detections with confidence > 0.5
+            print(detections)
+            print("Filtrando...")
             detections = detections[detections.confidence > 0.5]
+            print(detections)
             for _, confidence, class_id, tracker_id in detections:
                 class_name = model.model.names[class_id]  
                 if class_id in detections_dict:
