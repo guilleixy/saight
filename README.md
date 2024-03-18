@@ -55,7 +55,8 @@ Follow these steps to set up your development environment:
     ```bash
     pip install pyttsx3
     ```
-
+pip install boto3
+pip install openai
     *Para SpeechRecognition: pip install SpeechRecognition y pip install pyaudio
 ## Usage
 

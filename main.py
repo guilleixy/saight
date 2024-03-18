@@ -11,12 +11,19 @@ import queue
 import speech_recognition as sr
 
 speech_queue = queue.Queue()
+frame_queue = queue.Queue()
 
 # Crear un reconocedor de voz
 r = sr.Recognizer()
 
 # A list of words similar to saigth to activate the voice assistant
 saigth_words = ["saigth", "site", "sight", "cite"]
+
+def save_frame(frame, filename, folder):
+    # Create the full path for the output file
+    path = f"{folder}/{filename}"
+    # Save the frame as an image file
+    cv2.imwrite(path, frame)   
 
 def speak(engine, queue):
     while True:
@@ -26,9 +33,8 @@ def speak(engine, queue):
         engine.say(text)
         engine.runAndWait()
 
-def listen():
+def listen(frame_queue):
     while True:
-        print("Escuchando...")
         with sr.Microphone() as source:
             print("Habla algo:")
             audio = r.listen(source)
@@ -41,6 +47,8 @@ def listen():
                     speech_queue.put("Esto lo respondería GPT")
                 if any(word in text for word in saigth_words):
                     speech_queue.put("Esto lo respondería Saight")
+                    frame = frame_queue.get()  # Get the latest frame
+                    save_frame(frame, "output.jpg", "images")
                 print("Dijiste: {}".format(text))
 
             except sr.UnknownValueError:
@@ -83,8 +91,9 @@ def main():
 
     # source = 0 for webcam, source = 1 for video input
     # we use a loop to iterate through each frame of the video 
-    for result in model.track(source=0, show=False, stream=True, verbose=False):
+    for result in model.track(source=1, show=False, stream=True, verbose=False):
         frame = result.orig_img
+        frame_queue.put(frame)
         detections = sv.Detections.from_yolov8(result)
         if result.boxes.id is not None:
             detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
@@ -93,10 +102,7 @@ def main():
             # the number of objects does not matter.
             
             #filter detections with confidence > 0.5
-            print(detections)
-            print("Filtrando...")
             detections = detections[detections.confidence > 0.5]
-            print(detections)
             for _, confidence, class_id, tracker_id in detections:
                 class_name = model.model.names[class_id]  
                 if class_id in detections_dict:
