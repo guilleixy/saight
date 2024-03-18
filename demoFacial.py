@@ -1,5 +1,6 @@
 import boto3
 import csv
+import pprint
 
 with open('demoCredentials.csv', 'r') as file:
     reader = csv.reader(file)
@@ -16,8 +17,6 @@ with open(photo, 'rb') as source_image:
 
 detect_faces = client.detect_faces(Image={'Bytes': source_bytes}, Attributes=['ALL'])
 
-print(detect_faces)
-
 for faceDetail in detect_faces['FaceDetails']:
     print('The detected face is between ' + str(faceDetail['AgeRange']['Low']) 
           + ' and ' + str(faceDetail['AgeRange']['High']) + ' years old')
@@ -25,3 +24,6 @@ for faceDetail in detect_faces['FaceDetails']:
     print('Smile: ' + str(faceDetail['Smile']['Value']))
     print('Eyeglasses: ' + str(faceDetail['Eyeglasses']['Value']))
     print('Gender: ' + str(faceDetail['Gender']['Value']))
+
+for faceDetail in detect_faces['FaceDetails']:
+    pprint.pprint(faceDetail)
