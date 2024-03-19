@@ -18,6 +18,8 @@ import boto3
 import csv
 import time
 
+import copy
+
 with open('demoCredentials.csv', 'r') as file:
     reader = csv.reader(file)
     for row in reader:
@@ -37,7 +39,7 @@ frame_queue = queue.Queue()
 r = sr.Recognizer()
 
 # A list of words similar to saigth to activate the voice assistant
-saigth_words = ["saigth", "site", "sight", "cite"]
+saigth_words = ["saigth", "site", "sight", "cite", "strike", "inside"]
 gpt_words = ["GPT", "gpt", "Gpt", "gepete", "jepete"]
 images_path = "outputimages/"
 
@@ -55,7 +57,7 @@ def rekognition_response(photo):
     detect_objects = client.detect_labels(Image={'Bytes': source_bytes})
     for label in detect_objects['Labels']:
         print(label['Name'] + ' : ' + str(label['Confidence']))
-    return detect_objects['Name']
+    
 
 def text_rekognition_response(photo):
     with open(photo, 'rb') as source_image:
@@ -64,7 +66,7 @@ def text_rekognition_response(photo):
     detect_text = client.detect_text(Image={'Bytes': source_bytes})
     for label in detect_text['TextDetections']:
         print(label['DetectedText'] + ' : ' + str(label['Confidence']))
-    return detect_text['DetectedText']
+    speech_queue.put(detect_text['TextDetections']) 
 # estoy hay que arreglarlo
 def facial_rekognition_response(photo):
     with open(photo, 'rb') as source_image:
@@ -73,7 +75,14 @@ def facial_rekognition_response(photo):
     detect_faces = client.detect_faces(Image={'Bytes': source_bytes})
     for label in detect_faces['FaceDetails']:
         print(label['Emotions'])
-    return detect_faces['Emotions']
+    speech_queue.put(detect_faces['Emotions'])
+
+def famouse_rekognition_response(photo):
+    with open(photo, 'rb') as source_image:
+        source_bytes = source_image.read()
+    detect_famous = client.recognize_celebrities(Image={'Bytes': source_bytes})
+    for celebrity in detect_famous['CelebrityFaces']:
+        speech_queue.put(celebrity['Name'])
 
 def chatgpt_response(prompt):
     response = openai.ChatCompletion.create(
@@ -84,7 +93,7 @@ def chatgpt_response(prompt):
             {"role": "user", "content": prompt}
         ]
     )
-    return response['choices'][0]['message']['content']
+    speech_queue.put(response.choices[0].message['content'])
 
 def speak(engine, queue):
     while True:
@@ -162,14 +171,15 @@ def main():
 
     speech_thread = threading.Thread(target=speak, args=(engine, speech_queue))
     speech_thread.start()
-    listen_thread = threading.Thread(target=listen)
+    listen_thread = threading.Thread(target=listen, args=(frame_queue, persistent_detections))
     listen_thread.start()
 
     # source = 0 for webcam, source = 1 for video input
     # we use a loop to iterate through each frame of the video 
     for result in model.track(source=0, show=False, stream=True, verbose=False):
         frame = result.orig_img
-        frame_queue.put(frame)
+        frame_without_boxes = copy.deepcopy(frame)  # Create a copy of the frame before boxes are drawn
+        frame_queue.put(frame_without_boxes) 
         detections = sv.Detections.from_yolov8(result)
         if result.boxes.id is not None:
             detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
